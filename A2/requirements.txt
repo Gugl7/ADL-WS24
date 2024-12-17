@@ -3,3 +3,9 @@ paddlepaddle
 seqeval
 tensorboardX
 transformers
+tqdm
+PIL
+numpy
+pandas
+difflib
+pathlib

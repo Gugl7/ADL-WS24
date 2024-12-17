@@ -5,7 +5,14 @@ import os
 class ImageProcessor:
     """Handles all image processing and OCR operations."""
 
-    def write_image_to_csv(self, img_path, csv_file_path):
+    @staticmethod
+    def write_image_to_csv(img_path, csv_file_path):
+        """Writes the text extracted from the image to a CSV file. Satisfiies the necessary format for later usage in LayoutLM.
+
+        Args:
+            img_path (Path): Path to the given image.
+            csv_file_path (Path): Path to the output csv file.
+        """
         if not os.path.exists(csv_file_path):
             with open(csv_file_path, 'w') as file:
                 pass
@@ -23,4 +30,4 @@ class ImageProcessor:
 if __name__ == "__main__":
     img_path = "sample.jpg"
     csv_file_path = "sample.csv"
-    ImageProcessor.write_image_to_csv(ImageProcessor(), img_path, csv_file_path)
+    ImageProcessor.write_image_to_csv(img_path, csv_file_path)
