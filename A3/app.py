@@ -5,7 +5,7 @@ from transformers import LayoutLMForTokenClassification, LayoutLMTokenizer
 from paddleocr import PaddleOCR
 import numpy as np
 
-def extract_text_from_image(image):
+def extract_text_from_image(image:Image) -> list:
     """Extracts text and coordinates from the image. Satisfies the necessary format for later usage in LayoutLM.
 
     Args:
@@ -31,14 +31,20 @@ def extract_text_from_image(image):
     return coords, txt
 
 @st.cache_resource
-def load_model():
+def load_model() -> list:
+    """Loads the model from the already predetermined path. The model is cached to avoid loading it multiple times.
+
+    Returns:
+        model: Model loaded from the path.
+        tokenizer: Tokenizer loaded from the path.
+    """
     model_path = "./layoutlm_model/"  # Update with your local path
     model = LayoutLMForTokenClassification.from_pretrained(model_path)
     tokenizer = LayoutLMTokenizer.from_pretrained(model_path)
     model.eval()
     return model, tokenizer
 
-def concatenate_words_by_label(words, labels):
+def concatenate_words_by_label(words:list, labels: list) -> dict:
     """
     Concatenates words for each unique label.
 
@@ -63,7 +69,7 @@ def concatenate_words_by_label(words, labels):
     
     return result
 
-def infer_single_image(image, model_path, tokenizer_path, labels, device='cuda' if torch.cuda.is_available() else 'cpu'):
+def infer_single_image(image:Image, model_path:str, tokenizer_path:str, labels:list, device:str='cuda' if torch.cuda.is_available() else 'cpu') -> dict:
     """
     Perform inference on a single PIL.Image file with a pre-trained LayoutLM model.
     
@@ -81,27 +87,21 @@ def infer_single_image(image, model_path, tokenizer_path, labels, device='cuda' 
     model = LayoutLMForTokenClassification.from_pretrained(model_path)
     model.to(device).eval()
     
-    coordinates, text = extract_text_from_image(image)
-    print(text)
-    print(coordinates)
+    _, text = extract_text_from_image(image)
     input_ids = tokenizer.encode(text, return_tensors="pt").to(device)
     input_ids = input_ids[:, :len(text)]
     attention_mask = torch.ones_like(input_ids)
-    bbox=torch.tensor([coordinates], dtype=torch.long).to(device)
 
     with torch.no_grad():
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         logits = outputs.logits
     
-    # Get predicted labels
     predictions = torch.argmax(logits, dim=-1).cpu().numpy()[0]
     label_map = {i: label for i, label in enumerate(labels)}
     pred_labels = [label_map[pred] for pred in predictions]
     
-    # Return predictions
     return {'input_text': text, 'predicted_labels': pred_labels}
 
-# Streamlit App
 st.title('Receipt OCR Scanner')
 st.write('Upload a receipt image to extract text using a LayoutLM model')
 
@@ -110,7 +110,6 @@ uploaded_file = st.file_uploader("Choose a receipt image...", type=["jpg", "jpeg
 if uploaded_file is not None:
     st.divider()
     image = Image.open(uploaded_file).convert("RGB")
-    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -125,9 +124,3 @@ if uploaded_file is not None:
             results = infer_single_image(image, "./layoutlm_model/", "./layoutlm_model/", ["S-COMPANY", "S-DATE", "S-ADDRESS", "S-TOTAL", "O"], device='cuda')
             st.write("Predicted Labels:")
             st.json(concatenate_words_by_label(results['input_text'], results['predicted_labels']))
-            # results = {"COMPANY": "WAL*MART",
-            #             "DATE": "08/20/10",
-            #             "ADDRESS": "MANAGERTBA 515986-1783",
-            #             "TOTAL": "5.11"}
-            # st.json(results)
-            print(results)
