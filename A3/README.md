@@ -9,4 +9,4 @@
 
 ## How to run demo app
 
-First step is to install the required libraries using `requirements.txt`. What is also necessary is putting the folder `layoutlm_model` with the model from the previous assignment. After this, typing `streamlit run app.py` in the folder `A3` should start the app.
+First step is to install the required libraries using `requirements.txt`. What is also necessary is creating the folder `layoutlm_model` with the model from the previous assignment (it can be downloaded from github releases). After this, typing the command `streamlit run app.py` in console from the folder `A3` should start the app.
