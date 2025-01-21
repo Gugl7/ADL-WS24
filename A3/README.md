@@ -3,7 +3,7 @@
 ## Structure
 
 - `app.py`: Demo Application built in python using streamlit library to showcase the results from the previous assignment.
-- `report.pdf`: A final report of what was done in the project.
+- `report_Gugleta.pdf`: A final report of what was done in the project.
 - `presentation_link.txt`: Link to the youtube video where the presentation was uploaded.
 - `requirements.txt`: list of requirements of what is necessary to run the demo app.
 
